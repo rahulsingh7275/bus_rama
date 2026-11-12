@@ -28,7 +28,7 @@ class HomeController extends Controller
     public function index()
     {
         if (Auth::user()->role === 'user') {
-            $tickets = Ticket::with(['fromStation', 'toStation', 'bus'])->orderBy('travel_date','desc')
+            $tickets = Ticket::with(['fromStation', 'toStation', 'bus'])->orderBy('id','desc')
             ->where('user_id',Auth::user()->id)
             ->withTrashed()
             ->get();

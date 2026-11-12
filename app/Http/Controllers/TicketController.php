@@ -54,7 +54,7 @@ class TicketController extends Controller
         }
 
         // Execute the query and get results
-        $tickets = $query->get();
+        $tickets = $query->orderBy('id','DESC')->get();
 
         // Return the view with tickets
         return view('tickets.index', compact('tickets'));
