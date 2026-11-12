@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class CashfreePayment extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'ticket_id',
+        'contact',
+        'order_id',
+        'payment_id',
+        'currency',
+        'amount',
+        'receipt',
+        'response',
+        'status',
+        'refund_status',
+        'refund_amount',
+    ];
+}
