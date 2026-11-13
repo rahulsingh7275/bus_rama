@@ -18,7 +18,7 @@
    <div class="p-3 control-sidebar-content os-host os-theme-light os-host-resize-disabled os-host-scrollbar-horizontal-hidden os-host-scrollbar-vertical-hidden os-host-transition" style="height: 210px;">
       
       <ul class="right-bar-style">
-         <li><a href="{{url('admin/change-password')}}">Change Password</a></li>
+         <li><a href="{{ route('password.change') }}">Change Password</a></li>
          <li>
             <a class="dropdown-item" href="{{ route('logout') }}"
                onclick="event.preventDefault();

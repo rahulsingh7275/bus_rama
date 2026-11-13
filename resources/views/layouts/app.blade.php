@@ -221,11 +221,12 @@
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     @if(Auth::user()->role=='user')
-                                    <a class="dropdown-item" href="{{ route('home') }}">{{ __('My Bookings') }}</a>
+                                    <a class="dropdown-item" href="{{ url('home') }}">{{ __('My Bookings') }}</a>
                                     <a class="dropdown-item" href="{{ route('profile') }}">{{ __('Profile') }}</a>
                                     @else
-                                    <a class="dropdown-item" href="{{ route('home') }}">{{ __('Dashboard') }}</a>
+                                    <a class="dropdown-item" href="{{ url('home') }}">{{ __('Dashboard') }}</a>
                                     @endif
+                                    <a class="dropdown-item" href="{{ route('password.change') }}">{{ __('Change Password') }}</a>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">

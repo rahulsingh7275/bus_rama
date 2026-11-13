@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use PhpParser\Node\Expr\AssignOp\ShiftLeft;
 
 class HomeController extends Controller
@@ -52,6 +53,21 @@ class HomeController extends Controller
     {
         return view('profile');
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'mobile' => ['required', 'digits:10', Rule::unique('users')->ignore($user->id)],
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('profile')->with('success', 'Profile updated successfully.');
+    }
+
     public function welcome()
     {
         return view('welcome');

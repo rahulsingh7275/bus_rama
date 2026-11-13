@@ -15,6 +15,10 @@ use App\Http\Controllers\Payment\CashfreeController;
 use App\Http\Controllers\Payment\RazorpayController;
 use App\Http\Controllers\PaymentSettingsController;
 use App\Http\Controllers\WebsiteSettingController;
+use App\Http\Controllers\Auth\OtpLoginController;
+use App\Http\Controllers\PasswordController;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +60,9 @@ Auth::routes();
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('/profile', [App\Http\Controllers\HomeController::class, 'profile'])->name('profile');
+    Route::put('/profile', [App\Http\Controllers\HomeController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/change-password', [PasswordController::class, 'edit'])->name('password.change');
+    Route::put('/change-password', [PasswordController::class, 'update'])->name('password.change.update');
 
 
     Route::middleware(['admin'])->group(function () {
@@ -95,8 +102,40 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+// ===============Route for Otp Login===============
+
+Route::middleware('guest')->group(function () {
+
+    Route::get('/otp-login', [OtpLoginController::class, 'showLogin']);
+
+    Route::post('/send-otp', [OtpLoginController::class, 'sendOtp'])
+        ->middleware('throttle:3,1')
+        ->name('otp.send');
+
+    Route::get('/verify-otp/{userId}', [OtpLoginController::class, 'showVerify'])
+        ->name('otp.verify.page');
+
+    Route::post('/verify-otp', [OtpLoginController::class, 'verifyOtp'])
+        ->middleware('throttle:5,1')
+        ->name('otp.verify');
+    Route::post('/resend-otp/{userId}', [OtpLoginController::class, 'resendOtp'])
+    ->middleware('throttle:3,1')
+    ->name('otp.resend');
+});
+
+Route::middleware('auth')->group(function () {
+
+    Route::post('/logout', function () {
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect('/login');
+    })->name('logout');
+
+});
 
 
-// Route::get('cashfree/payments/create', [CashfreePaymentController::class, 'create'])->name('callback');
-// Route::post('cashfree/payments/store', [CashfreePaymentController::class, 'store'])->name('store');
-// Route::any('cashfree/payments/success', [CashfreePaymentController::class, 'success'])->name('success');
+// =============Database Migrations=========
+// php artisan migrate --path=database/migrations/2026_11_12_211948_add_mobile_to_users_table.php
+// php artisan migrate --path=database/migrations/2026_11_12_212008_create_login_otps_table.php

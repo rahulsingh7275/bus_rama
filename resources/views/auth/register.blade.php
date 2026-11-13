@@ -49,6 +49,20 @@
                         </div>
 
                         <div class="row mb-3">
+                            <label for="mobile" class="col-md-4 col-form-label text-md-end">{{ __('Mobile Number') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="mobile" type="tel" class="form-control @error('mobile') is-invalid @enderror" name="mobile" value="{{ old('mobile') }}" required autocomplete="tel" inputmode="numeric" maxlength="10">
+
+                                @error('mobile')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
                             <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
 
                             <div class="col-md-6">
@@ -87,8 +101,11 @@
                         <div class="row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
-                                    {{ __('Register') }}
+                                    <i class="fas fa-user-plus"></i> {{ __('Register') }}
                                 </button>
+                                <a href="{{ route('login') }}" class="btn btn-success">
+                                    <i class="fas fa-sign-in-alt"></i> {{ __('Login') }}
+                                </a>
                             </div>
                         </div>
                     </form>

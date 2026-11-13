@@ -105,6 +105,15 @@
             </a>
           </li>
 
+          <li class="{{ Request::is('change-password') ? 'active' : '' }}">
+            <a href="{{ route('password.change') }}" class="navItem">
+              <span class="flex items-center">
+                <iconify-icon class="nav-icon" icon="heroicons-outline:lock-closed"></iconify-icon>
+                <span>Change Password</span>
+              </span>
+            </a>
+          </li>
+
           <!-- <li class="{{ Request::is('conductor/tickets') ? 'active' : '' }}">
             <a href="{{url('conductor/tickets')}}" class="navItem">
               <span class="flex items-center">

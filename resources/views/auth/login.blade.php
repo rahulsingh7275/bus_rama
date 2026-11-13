@@ -62,7 +62,7 @@
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        <!-- <div class="row mb-3">
                             <div class="col-md-6 offset-md-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
@@ -72,20 +72,25 @@
                                     </label>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
-                        <div class="row mb-0">
+                        <div class="row mb-3">
                             <div class="col-md-8 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
-                                    {{ __('Login') }}
+                                    <i class="fas fa-sign-in-alt"></i> {{ __('Login') }}
                                 </button>
                                 &nbsp;&nbsp;
-                                <a class="btn btn-success sign-up" href="{{url('register')}}"><i class="fas fa-user-plus"></i>Register</a>
+                                <a class="btn btn-success sign-up" href="{{url('register')}}"><i class="fas fa-user-plus"></i> Register</a>
                                 @if (Route::has('password.request'))
-                                    <a class="btn btn-link" href="{{ route('password.request') }}">
+                                    <!-- <a class="btn btn-link" href="{{ route('password.request') }}">
                                         {{ __('Forgot Your Password?') }}
-                                    </a>
+                                    </a> -->
                                 @endif
+                            </div>
+                        </div>
+                        <div class="row mb-0">
+                            <div class="col-md-8 offset-md-4">
+                                <!-- <a href="{{url('otp-login')}}" class="btn btn-info btn-block"><i class="fas fa-mobile-alt"></i> Login with OTP</a> -->
                             </div>
                         </div>
                     </form>
