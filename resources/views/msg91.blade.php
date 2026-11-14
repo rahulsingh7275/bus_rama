@@ -3,7 +3,7 @@
 var configuration = {   
   widgetId: "{{ config('services.msg91.widget_id') }}",
   tokenAuth: "{{ config('services.msg91.token_auth') }}",
-  identifier: "917275638862",
+  identifier: "91{{ Request()->mobile }}",
   exposeMethods: "<true | false> (optional)",  // When true will expose the methods for OTP verification. Refer 'How it works?' for more details
   success: (data) => {
         console.log('MSG91 success:', data);
