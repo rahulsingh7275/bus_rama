@@ -20,6 +20,18 @@
     table-layout: auto; /* Let the table take as much width as needed */
     width: 100%; /* Optional: Full width table */
   }
+
+  .ticket-filter-dialog {
+    width: min(540px, calc(100% - 2rem));
+    max-height: calc(100% - 2rem);
+    padding: 0;
+    border: 0;
+    border-radius: 0.5rem;
+  }
+
+  .ticket-filter-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+  }
 </style>
 @endsection
 
@@ -32,7 +44,82 @@
     <div id="content_layout">
       
       <!-- DataTable Code Here -->
-      <h5>Booked Ticket List</h5>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Booked Ticket List</h5>
+        <button type="button" class="btn btn-primary" id="openTicketFilters">
+          Filters
+          @if(request()->hasAny(['bus_id', 'date_from', 'date_to', 'search', 'payment_status', 'ticket_status']))
+            <span class="badge badge-light">Applied</span>
+          @endif
+        </button>
+      </div>
+
+      <dialog class="ticket-filter-dialog" id="ticketFilterDialog" aria-labelledby="ticketFilterTitle">
+        <div class="card mb-0">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0" id="ticketFilterTitle">Filter booked tickets</h5>
+            <button type="button" class="close" id="closeTicketFilters" aria-label="Close">&times;</button>
+          </div>
+          <form method="GET" action="{{ route('tickets.index') }}">
+            @if(request()->filled('type'))
+              <input type="hidden" name="type" value="{{ request('type') }}">
+            @endif
+            <div class="card-body">
+              <div class="form-group">
+                <label for="filterBus">Bus</label>
+                <select class="form-control" id="filterBus" name="bus_id">
+                  <option value="">All buses</option>
+                  @foreach($buses as $bus)
+                    <option value="{{ $bus->id }}" {{ (string) request('bus_id') === (string) $bus->id ? 'selected' : '' }}>
+                      {{ $bus->name }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="filterDateFrom">Travel date from</label>
+                  <input class="form-control" type="date" id="filterDateFrom" name="date_from" value="{{ request('date_from') }}">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="filterDateTo">Travel date to</label>
+                  <input class="form-control" type="date" id="filterDateTo" name="date_to" value="{{ request('date_to') }}">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="filterSearch">Ticket number or passenger name</label>
+                <input class="form-control" type="search" id="filterSearch" name="search" value="{{ request('search') }}" maxlength="255">
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="filterPaymentStatus">Payment status</label>
+                  <select class="form-control" id="filterPaymentStatus" name="payment_status">
+                    <option value="">All payment statuses</option>
+                    <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Paid</option>
+                    <option value="unpaid" {{ request('payment_status') === 'unpaid' ? 'selected' : '' }}>Not paid</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="filterTicketStatus">Ticket status</label>
+                  <select class="form-control" id="filterTicketStatus" name="ticket_status">
+                    <option value="">All ticket statuses</option>
+                    <option value="active" {{ request('ticket_status') === 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="cancelled" {{ request('ticket_status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+              <a class="btn btn-light" href="{{ route('tickets.index', request()->only('type')) }}">Clear filters</a>
+              <div>
+                <button type="button" class="btn btn-secondary" id="dismissTicketFilters">Close</button>
+                <button type="submit" class="btn btn-primary">Apply filters</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </dialog>
+
       <div class="card">
          
       <div class="card-body px-6 pb-6">
@@ -108,6 +195,14 @@
 <script>
 
 $(function () {
+  const filterDialog = document.getElementById('ticketFilterDialog');
+  $('#openTicketFilters').on('click', function () {
+    filterDialog.showModal();
+  });
+  $('#closeTicketFilters, #dismissTicketFilters').on('click', function () {
+    filterDialog.close();
+  });
+
   $("#example1").DataTable({
     responsive: true,  // Enable responsive mode
     layout: {

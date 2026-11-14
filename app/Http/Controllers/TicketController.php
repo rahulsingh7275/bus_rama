@@ -7,6 +7,7 @@ use App\Models\Bus;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 // QR Codes
 use Endroid\QrCode\QrCode;
@@ -33,9 +34,23 @@ class TicketController extends Controller
     {
         $user = Auth::user();
         $allowed_buses = $user->conductorBusesList();
+        $dateToRules = ['nullable', 'date_format:Y-m-d'];
+        if ($request->filled('date_from')) {
+            $dateToRules[] = 'after_or_equal:date_from';
+        }
+
+        $filters = $request->validate([
+            'bus_id' => ['nullable', 'integer', Rule::in($allowed_buses)],
+            'date_from' => ['nullable', 'date_format:Y-m-d'],
+            'date_to' => $dateToRules,
+            'search' => ['nullable', 'string', 'max:255'],
+            'payment_status' => ['nullable', Rule::in(['paid', 'unpaid'])],
+            'ticket_status' => ['nullable', Rule::in(['active', 'cancelled'])],
+        ]);
+
         // Start building the query
         $query = Ticket::whereIn('bus_id',$allowed_buses)
-        ->with(['fromStation', 'toStation', 'bus'])
+        ->with(['fromStation', 'toStation', 'bus', 'payment'])
             ->orderBy('travel_date', 'DESC');
 
         // Apply filters based on request type
@@ -53,11 +68,44 @@ class TicketController extends Controller
             $query->withTrashed();
         }
 
+        if (!empty($filters['bus_id'])) {
+            $query->where('bus_id', $filters['bus_id']);
+        }
+
+        if (!empty($filters['date_from'])) {
+            $query->whereDate('travel_date', '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $query->whereDate('travel_date', '<=', $filters['date_to']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($ticketQuery) use ($search) {
+                $ticketQuery->where('ticket_no', 'like', '%' . $search . '%')
+                    ->orWhere('passenger_name', 'like', '%' . $search . '%');
+            });
+        }
+
+        if (($filters['payment_status'] ?? null) === 'paid') {
+            $query->whereNotNull('payment_id');
+        } elseif (($filters['payment_status'] ?? null) === 'unpaid') {
+            $query->whereNull('payment_id');
+        }
+
+        if (($filters['ticket_status'] ?? null) === 'cancelled') {
+            $query->withTrashed()->whereNotNull('deleted_at');
+        } elseif (($filters['ticket_status'] ?? null) === 'active') {
+            $query->whereNull('deleted_at');
+        }
+
         // Execute the query and get results
         $tickets = $query->orderBy('id','DESC')->get();
+        $buses = Bus::whereIn('id', $allowed_buses)->orderBy('name')->get();
 
         // Return the view with tickets
-        return view('tickets.index', compact('tickets'));
+        return view('tickets.index', compact('tickets', 'buses'));
     }
 
     // public function create() {
