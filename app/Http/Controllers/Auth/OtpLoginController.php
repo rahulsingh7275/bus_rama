@@ -38,80 +38,80 @@ class OtpLoginController extends Controller
     }
 
     // Generate and send OTP
-    public function sendOtp(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'mobile' => 'required|digits:10'
-        ]);
+    // public function sendOtp(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'mobile' => 'required|digits:10'
+    //     ]);
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator)
-                         ->withInput();
-        }
+    //     if ($validator->fails()) {
+    //         return back()->withErrors($validator)
+    //                      ->withInput();
+    //     }
 
-        $user = User::where('mobile', $request->mobile)->first();
+    //     $user = User::where('mobile', $request->mobile)->first();
 
-        if (!$user) {
-            return back()->with('error', 'Mobile number is not registered.');
-        }
+    //     if (!$user) {
+    //         return back()->with('error', 'Mobile number is not registered.');
+    //     }
 
-        $existingOtp = LoginOtp::where('user_id', $user->id)->latest()->first();
-        if ($existingOtp && Carbon::now()->lt($existingOtp->updated_at->copy()->addSeconds(60))) {
-            $resendAvailableAt = $existingOtp->updated_at->copy()->addSeconds(60)->timestamp;
+    //     $existingOtp = LoginOtp::where('user_id', $user->id)->latest()->first();
+    //     if ($existingOtp && Carbon::now()->lt($existingOtp->updated_at->copy()->addSeconds(60))) {
+    //         $resendAvailableAt = $existingOtp->updated_at->copy()->addSeconds(60)->timestamp;
 
-            return back()->withInput()
-                         ->with('otp_mobile', $user->mobile)
-                         ->with('resendAvailableAt', $resendAvailableAt)
-                         ->with('error', 'Please wait before requesting another OTP.');
-        }
+    //         return back()->withInput()
+    //                      ->with('otp_mobile', $user->mobile)
+    //                      ->with('resendAvailableAt', $resendAvailableAt)
+    //                      ->with('error', 'Please wait before requesting another OTP.');
+    //     }
 
-        $otp = (string) random_int(100000, 999999);
+    //     $otp = (string) random_int(100000, 999999);
 
-        DB::transaction(function () use ($user, $otp) {
+    //     DB::transaction(function () use ($user, $otp) {
 
-            // Remove previous OTP
-            LoginOtp::where('user_id', $user->id)->delete();
+    //         // Remove previous OTP
+    //         LoginOtp::where('user_id', $user->id)->delete();
 
-            // Save new OTP as a hash
-            LoginOtp::create([
-                'user_id' => $user->id,
-                'otp_hash' => Hash::make($otp),
-                'expires_at' => Carbon::now()->addMinutes(5)
-            ]);
-        });
+    //         // Save new OTP as a hash
+    //         LoginOtp::create([
+    //             'user_id' => $user->id,
+    //             'otp_hash' => Hash::make($otp),
+    //             'expires_at' => Carbon::now()->addMinutes(5)
+    //         ]);
+    //     });
 
-        /*
-         * Send OTP using SMS Gateway here.
-         *
-         * Example:
-         * $this->sendSms($user->mobile, $otp);
-         */
+    //     /*
+    //      * Send OTP using SMS Gateway here.
+    //      *
+    //      * Example:
+    //      * $this->sendSms($user->mobile, $otp);
+    //      */
 
-        // For development only, do not expose OTP in production.
-        // Integrate your SMS provider before enabling real login.
+    //     // For development only, do not expose OTP in production.
+    //     // Integrate your SMS provider before enabling real login.
 
-        $request->session()->put('otp_mobile', $user->mobile);
+    //     $request->session()->put('otp_mobile', $user->mobile);
 
-        return redirect()->route('otp.verify.page', $user->id)
-                         ->with('success', 'OTP sent successfully.'.$otp);
-    }
+    //     return redirect()->route('otp.verify.page', $user->id)
+    //                      ->with('success', 'OTP sent successfully.'.$otp);
+    // }
 
-    // Show OTP verification page
-    public function showVerify($userId)
-    {
-        $otpRecord = LoginOtp::where('user_id', $userId)
-                            ->latest()
-                            ->first();
+    // // Show OTP verification page
+    // public function showVerify($userId)
+    // {
+    //     $otpRecord = LoginOtp::where('user_id', $userId)
+    //                         ->latest()
+    //                         ->first();
 
-        $resendAvailableAt = $otpRecord
-            ? $otpRecord->updated_at->copy()->addSeconds(60)->timestamp
-            : Carbon::now()->timestamp;
+    //     $resendAvailableAt = $otpRecord
+    //         ? $otpRecord->updated_at->copy()->addSeconds(60)->timestamp
+    //         : Carbon::now()->timestamp;
 
-        return view('auth.otp-verify', compact(
-            'userId',
-            'resendAvailableAt'
-        ));
-    }
+    //     return view('auth.otp-verify', compact(
+    //         'userId',
+    //         'resendAvailableAt'
+    //     ));
+    // }
 
     // Verify OTP
     public function verifyOtp(Request $request)
@@ -197,7 +197,6 @@ class OtpLoginController extends Controller
         }
 
         $result = json_decode($response, true);
-
         // MSG91 verification response check
         if (
             $httpCode !== 200 ||
@@ -259,44 +258,44 @@ class OtpLoginController extends Controller
         ]);
     }
 
-    public function resendOtp($userId)
-    {
-        $user = User::findOrFail($userId);
+    // public function resendOtp($userId)
+    // {
+    //     $user = User::findOrFail($userId);
 
-        $otpRecord = LoginOtp::where('user_id', $user->id)
-                            ->latest()
-                            ->first();
+    //     $otpRecord = LoginOtp::where('user_id', $user->id)
+    //                         ->latest()
+    //                         ->first();
 
-        if (!$otpRecord) {
-            return back()->with('error', 'Please request a new OTP.');
-        }
+    //     if (!$otpRecord) {
+    //         return back()->with('error', 'Please request a new OTP.');
+    //     }
 
-        // Check 60 seconds cooldown
-        $availableAt = $otpRecord->updated_at->copy()->addSeconds(60);
+    //     // Check 60 seconds cooldown
+    //     $availableAt = $otpRecord->updated_at->copy()->addSeconds(60);
 
-        if (Carbon::now()->lt($availableAt)) {
+    //     if (Carbon::now()->lt($availableAt)) {
 
-            $remaining = Carbon::now()->diffInSeconds($availableAt);
+    //         $remaining = Carbon::now()->diffInSeconds($availableAt);
 
-            return back()->with(
-                'error',
-                "Please wait {$remaining} seconds before requesting another OTP."
-            );
-        }
+    //         return back()->with(
+    //             'error',
+    //             "Please wait {$remaining} seconds before requesting another OTP."
+    //         );
+    //     }
 
-        // Generate new OTP
-        $otp = (string) random_int(100000, 999999);
+    //     // Generate new OTP
+    //     $otp = (string) random_int(100000, 999999);
 
-        $otpRecord->update([
-            'otp_hash' => Hash::make($otp),
-            'expires_at' => Carbon::now()->addMinutes(5),
-            'is_verified' => false
-        ]);
+    //     $otpRecord->update([
+    //         'otp_hash' => Hash::make($otp),
+    //         'expires_at' => Carbon::now()->addMinutes(5),
+    //         'is_verified' => false
+    //     ]);
 
-        // Send OTP using SMS Gateway
-        // $this->sendSms($user->mobile, $otp);
+    //     // Send OTP using SMS Gateway
+    //     // $this->sendSms($user->mobile, $otp);
 
-        return back()->with('success', 'New OTP sent successfully.'.$otp);
-    }
+    //     return back()->with('success', 'New OTP sent successfully.'.$otp);
+    // }
 
 }

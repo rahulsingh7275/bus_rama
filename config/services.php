@@ -33,6 +33,8 @@ return [
     
     'msg91' => [
         'auth_key' => env('MSG91_AUTH_KEY'),
+        'token_auth' => env('MSG91_AUTH_TOKEN'),
+        'widget_id' => env('MSG91_WIDGET_ID'),
         'ca_bundle' => env('MSG91_CA_BUNDLE'),
         'template_id' => env('MSG91_TEMPLATE_ID'),
         'sender_id' => env('MSG91_SENDER_ID'),

@@ -1,8 +1,8 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script type="text/javascript">
 var configuration = {   
-  widgetId: "366b6e684e42363033353836",
-  tokenAuth: "589656TN1RyUGB7XLp6af81d60P1",
+  widgetId: "{{ config('services.msg91.widget_id') }}",
+  tokenAuth: "{{ config('services.msg91.token_auth') }}",
   identifier: "917275638862",
   exposeMethods: "<true | false> (optional)",  // When true will expose the methods for OTP verification. Refer 'How it works?' for more details
   success: (data) => {
