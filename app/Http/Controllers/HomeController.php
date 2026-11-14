@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,6 +49,14 @@ class HomeController extends Controller
         $tickets['cancelled_tickets'] = Ticket::whereIn('bus_id',$allowed_buses)->whereNotNull('deleted_at')->withTrashed()->count();
         $tickets['all_tickets'] = Ticket::whereIn('bus_id',$allowed_buses)->withTrashed()->count();
         return view('tickets.admin-dashboard',$tickets);
+    }
+    public function passengers()
+    {
+        $passengers = User::where('role', 'user')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return view('tickets.passengers', compact('passengers'));
     }
     public function profile()
     {

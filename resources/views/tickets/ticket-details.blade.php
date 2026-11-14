@@ -51,7 +51,11 @@ blockquote {
                     <div class="ticket-wrapper">
                         <div class="ticket-item-new">
                             <div class="row">
-                                <div class="col-md-6">
+                                @if(Request()->nss == null && Request()->nnss == null)
+                                <div class="col-md-6 offset-md-3">
+                                    <h5 class="bus-namet text-center">Ticket Details : {{ $bus->name }}</h5>
+                                    <h6 class="text-center"><code>Journey Duration: {{ $bus->travel_duration }}</code></h6>
+                                    <hr>
                                     <form class="contact-form row gy-3">
                                         <div class="form--group" @if($bus->number_of_sleeper_seats<1) style="display: none;" @endif>
                                             <div class="row">
@@ -107,11 +111,13 @@ blockquote {
                                     </form>
                                     <hr>
                                 </div>
+                                @endif
 
-                                <div class="col-md-6">
+                                @if(Request()->nss > 0 || Request()->nnss > 0)
+                                <div class="col-md-8 offset-md-2">
                                     <div class="ticket-item-inner">
-                                        <h5 class="bus-name">Boarding & Dropping ({{ $bus->name }})</h5>
-                                        <span>Journey Duration: {{ $bus->travel_duration }}</span>
+                                        <h5 class="bus-name text-center">Boarding & Dropping ({{ $bus->name }})</h5>
+                                        <h6 class="text-center"><code>Journey Duration: {{ $bus->travel_duration }}</code></h6>
                                         <span class="ratting">
                                             <i class="las la-bus"></i>{{ $bus->bus_type }}
                                         </span>
@@ -156,29 +162,29 @@ blockquote {
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-10">
                                             <h6>Number of Passengers</h6>
                                         </div>
-                                        <div class="col-md-6" style="text-align: right;">
+                                        <div class="col-2" style="text-align: right;">
                                             <h6>{{ Request()->passenger_count }}</h6>
                                         </div>
                                     </div>
 
                                     <div class="ticket-item-footer">
                                         <div class="row">
-                                            <div class="col-md-8" style="margin-top: 15px;">
+                                            <div class="col-10" style="margin-top: 15px;">
                                                 <h6>Amount 
                                                     <!-- <code>(Rs.{{ $bus->fare }}/Passenger)</code> -->
                                                 </h6>
                                                 <span class="bus-info">Taxes will be calculated during payment.</span>
                                             </div>
-                                            <div class="col-md-4" style="margin-top: 15px;">
+                                            <div class="col-2" style="margin-top: 15px;">
                                                 <h6 style="text-align: right;">Rs.{{ ((Request()->nnss * $bus->fare) + (Request()->nss * $bus->sleeper_fare)) }}</h6>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="ticket-item-footer" style="text-align: right;">
+                                    <div class="ticket-item-footer">
                                         <form action="{{ url('tickets') }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="lat" id="lat">
@@ -191,7 +197,14 @@ blockquote {
                                             <input type="hidden" name="non_sleeper_passenger_count" value="{{ Request()->nnss }}" required>
                                             <input type="hidden" name="passenger_count" value="{{ Request()->passenger_count }}" required>
                                             <input type="hidden" name="passenger_name" value="{{ Request()->passenger_name }}" required>
-                                            <button type="submit" class="btn btn-danger">PROCEED TO BOOK</button>
+                                            <div class="row">
+                                                <div class="col-md-4 text-md-left mt-3">
+                                                    <button type="submit" class="btn btn-danger">PROCEED TO BOOK</button>
+                                                </div>
+                                                <div class="col-md-8 text-right mt-3">
+                                                    <a href="{{url('ticket-details')}}/{{$bus->id}}?travel_date={{ Request()->travel_date }}&pickup_id={{ Request()->pickup_id }}&drop_id={{ Request()->drop_id }}" class="btn btn-dark">GO BACK TO CHANGE SEATS AND NAME DETAILS</a>
+                                                </div>
+                                            </div>
                                         </form>
                                     </div>
 
@@ -201,6 +214,7 @@ blockquote {
                                     </div>
                                     @endif
                                 </div>
+                                @endif
                             </div>
                         </div>
                     </div>

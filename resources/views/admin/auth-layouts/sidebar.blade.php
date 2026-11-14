@@ -76,6 +76,14 @@
               </span>
             </a>
           </li>
+          <li class="{{ Request::is('passengers*') ? 'active' : '' }}">
+            <a href="{{ route('admin.passengers.index') }}" class="navItem">
+              <span class="flex items-center">
+                <iconify-icon class="nav-icon" icon="heroicons-outline:users"></iconify-icon>
+                <span>Passengers</span>
+              </span>
+            </a>
+          </li>
  
           <!-- <li class="{{ Request::is('conductors') ? 'active' : '' }}">
             <a href="{{url('conductors')}}" class="navItem">

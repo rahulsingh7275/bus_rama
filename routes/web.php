@@ -67,6 +67,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['admin'])->group(function () {
         Route::get('/admin/dashboard', [HomeController::class, 'adminDashboard'])->name('admin-dashboard');
+        Route::get('/passengers', [HomeController::class, 'passengers'])->name('admin.passengers.index');
         Route::resource('bus_stations', BusStationController::class);
         Route::resource('bus_pickup_drop_points', BusPickupDropPointController::class);
         Route::resource('bus_stopages', BusStopageController::class);

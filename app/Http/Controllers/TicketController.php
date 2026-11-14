@@ -166,8 +166,12 @@ class TicketController extends Controller
         // dd($data);
         $ticket = Ticket::create($data);  // Create the ticket
         $ticketId = $ticket->id;  // Retrieve the primary key;
-
-        return redirect('payment-process'.'/'.$ticketId)->with('success', 'Ticket information saved successfully.\nPlease proceed to payment.');
+        $payment_setting_check = \App\Models\PaymentSetting::first();
+        $queryString = http_build_query([
+            'gateway' => $payment_setting_check->gateway,
+            'mode' => $payment_setting_check->mode
+        ]);
+        return redirect('payment-process'.'/'.$ticketId.'?'.$queryString)->with('success', 'Ticket information saved successfully.\nPlease proceed to payment.');
     }
 
     // public function show(Ticket $ticket) {

@@ -3,7 +3,7 @@
 @section('content')
 @php 
 $availableTickets = $bus->availableTickets(date('d/m/Y',strtotime($ticket->travel_date)),$ticket->id);
-$payment_setting_check = \App\Models\PaymentSetting::get();
+$payment_setting_check = \App\Models\PaymentSetting::first();
 @endphp
 
 <style>
