@@ -42,6 +42,9 @@ Route::get('clear', function() {
 
 });
 
+Route::get('msg91', function () {
+    return view('msg91');
+});
 Route::get('/', [HomeController::class, 'welcome']);
 Route::get('contact-us', [HomeController::class, 'contactUs']);
 Route::get('about-us', [HomeController::class, 'aboutUs']);

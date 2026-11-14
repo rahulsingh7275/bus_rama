@@ -30,4 +30,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    
+    'msg91' => [
+        'auth_key' => env('MSG91_AUTH_KEY'),
+        'ca_bundle' => env('MSG91_CA_BUNDLE'),
+        'template_id' => env('MSG91_TEMPLATE_ID'),
+        'sender_id' => env('MSG91_SENDER_ID'),
+    ],
+
 ];

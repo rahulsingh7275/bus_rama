@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class OtpLoginController extends Controller
@@ -116,36 +117,135 @@ class OtpLoginController extends Controller
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'otp' => 'required|digits:6'
+            'access_token' => 'required|string',
         ]);
 
-        $user = User::findOrFail($request->user_id);
+        $authKey = config('services.msg91.auth_key');
+        if (!$authKey) {
+            Log::error('MSG91 auth key is not configured.');
 
-        $otpRecord = LoginOtp::where('user_id', $user->id)
-                             ->latest()
-                             ->first();
-
-        if (!$otpRecord) {
-            return back()->with('error', 'OTP not found. Please request again.');
+            return response()->json([
+                'status' => false,
+                'message' => 'MSG91 is not configured. Please contact support.',
+            ], 500);
         }
 
-        if ($otpRecord->is_verified) {
-            return back()->with('error', 'OTP already used.');
+        $caBundle = config('services.msg91.ca_bundle');
+        if ($caBundle && !is_readable($caBundle)) {
+            Log::error('MSG91 CA bundle is not readable.', ['path' => $caBundle]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'MSG91 connection is not configured correctly. Please contact support.',
+            ], 500);
         }
 
-        if (Carbon::now()->greaterThan($otpRecord->expires_at)) {
-            return back()->with('error', 'OTP expired. Please request again.');
+        $curl = curl_init();
+        if ($curl === false) {
+            Log::error('Unable to initialize cURL for MSG91 verification.');
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Unable to initialize MSG91 connection.',
+            ], 500);
         }
 
-        if (!Hash::check($request->otp, $otpRecord->otp_hash)) {
-            return back()->with('error', 'Invalid OTP.');
+        $curlOptions = [
+            CURLOPT_URL => 'https://control.msg91.com/api/v5/widget/verifyAccessToken',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_POST => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_POSTFIELDS => json_encode([
+                'authkey' => $authKey,
+                'access-token' => $request->access_token,
+            ]),
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Accept: application/json',
+            ],
+        ];
+
+        if ($caBundle) {
+            $curlOptions[CURLOPT_CAINFO] = $caBundle;
         }
 
-        // Mark OTP as verified
-        $otpRecord->update([
-            'is_verified' => true
-        ]);
+        curl_setopt_array($curl, $curlOptions);
+
+        $response = curl_exec($curl);
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($curl);
+        $curlErrorNumber = curl_errno($curl);
+
+        curl_close($curl);
+
+        if ($response === false) {
+            Log::error('MSG91 verification request failed.', [
+                'curl_errno' => $curlErrorNumber,
+                'curl_error' => $curlError,
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'MSG91 connection error.',
+            ], 500);
+        }
+
+        $result = json_decode($response, true);
+
+        // MSG91 verification response check
+        if (
+            $httpCode !== 200 ||
+            !is_array($result) ||
+            ($result['type'] ?? '') !== 'success'
+        ) {
+            Log::warning('MSG91 rejected access-token verification.', [
+                'http_code' => $httpCode,
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'OTP token verification failed.',
+            ], 401);
+        }
+
+        // Verified mobile number
+        $verifiedMobile = $result['message'] ?? null;
+
+        if (!is_string($verifiedMobile) && !is_numeric($verifiedMobile)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Mobile number not received from MSG91.',
+            ], 401);
+        }
+
+        $mobile = preg_replace('/\D+/', '', (string) $verifiedMobile);
+        if (strlen($mobile) === 12 && substr($mobile, 0, 2) === '91') {
+            $mobile = substr($mobile, 2);
+        }
+
+        if (strlen($mobile) !== 10) {
+            return response()->json([
+                'status' => false,
+                'message' => 'MSG91 returned an invalid mobile number.',
+            ], 401);
+        }
+
+        // Find existing user
+        $user = User::where('mobile', $mobile)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not registered.',
+            ], 404);
+        }
+
 
         // Login user
         Auth::login($user);
@@ -153,7 +253,10 @@ class OtpLoginController extends Controller
         // Regenerate session ID
         $request->session()->regenerate();
 
-        return redirect()->intended('/home');
+        return response()->json([
+            'status' => true,
+            'redirect' => redirect()->intended('/home')->getTargetUrl(),
+        ]);
     }
 
     public function resendOtp($userId)
