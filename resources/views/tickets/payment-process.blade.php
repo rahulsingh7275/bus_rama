@@ -254,6 +254,7 @@ hr{
                                                         </a>
                                                     </li>
                                                     @endif
+                                                    @if($payments->count() > 0)
                                                     @foreach($payments as $payment)
                                                     <li>
                                                         <a href="{{Request::url()}}?gateway={{$payment->gateway}}&mode={{$payment->mode}}">
@@ -262,6 +263,13 @@ hr{
                                                         </a>
                                                     </li>
                                                     @endforeach
+                                                    @else
+                                                    <li>
+                                                        <p>No payment options available.</p>
+                                                        <h6>You will get a call shortly for payment from our team.</h6>
+                                                    </li>
+                                                    @endif
+
                                                 </ul>
                                                 <hr>
                                                 <!-- Buttons for each payment method -->
