@@ -38,6 +38,7 @@ class Ticket extends Model
         'lat',
         'long',
         'ip_address',
+        'seat_numbers',
     ];
 
     // Relationships

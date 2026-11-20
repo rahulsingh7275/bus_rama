@@ -4,6 +4,7 @@
 @php 
 $availableTickets = $bus->availableTickets(date('d/m/Y',strtotime($ticket->travel_date)),$ticket->id);
 $payment_setting_check = \App\Models\PaymentSetting::first();
+$seatNumbers = json_decode($ticket->seat_numbers ?? '[]', true);
 @endphp
 
 <style>
@@ -158,6 +159,16 @@ hr{
                                         </div>
                                         <div class="ticket-item-footer">
                                             <div class="row">
+                                                <div class="col-xl-6 col-lg-6 col-md-6 col-6"><h6>Seat Numbers</h6></div>
+                                                <div class="col-xl-6 col-lg-6 col-md-6 col-6">
+                                                    <h6 style="text-align: right;">
+                                                        {{ is_array($seatNumbers) && count($seatNumbers) ? implode(', ', $seatNumbers) : 'Not assigned' }}
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="ticket-item-footer">
+                                            <div class="row">
                                                 <div class="col-xl-12 col-lg-12 col-md-12 col-12"><h6>Fare Details</h6></div>
                                                 <div class="col-xl-8 col-lg-8 col-md-8 col-8" style="margin-top: 15px;">
                                                     <h6>Amount 
@@ -202,17 +213,17 @@ hr{
                                             <br>
                                             <div class="row">
                                                 <div class="col-12"><h6>Contact Details</h6></div>
-                                                <div class="col-md-4 col-xs-12 col-sm-12">
+                                                <div class="col-12">
                                                     <strong style="color:#424248;">Our Address</strong>
                                                     <br>
                                                     {{website_setting('company_address')}}
                                                 </div>
-                                                <div class="col-md-4 col-xs-12 col-sm-12">
+                                                <div class="col-6">
                                                     <strong style="color:#424248;">Call Us</strong>
                                                     <br>
                                                     {{website_setting('company_contact')}}
                                                 </div>
-                                                <div class="col-md-4 col-xs-12 col-sm-12">
+                                                <div class="col-6">
                                                     <strong style="color:#424248;">Email Us</strong>
                                                     <br>
                                                     {{website_setting('company_email')}}

@@ -163,15 +163,14 @@ class TicketController extends Controller
             'long' => $request->long,
             'ip_address' => $request->ip(),
         ];
-        // dd($data);
         $ticket = Ticket::create($data);  // Create the ticket
         $ticketId = $ticket->id;  // Retrieve the primary key;
-        $payment_setting_check = \App\Models\PaymentSetting::first();
-        $queryString = http_build_query([
-            'gateway' => $payment_setting_check->gateway,
-            'mode' => $payment_setting_check->mode
-        ]);
-        return redirect('payment-process'.'/'.$ticketId.'?'.$queryString)->with('success', 'Ticket information saved successfully.\nPlease proceed to payment.');
+        // $payment_setting_check = \App\Models\PaymentSetting::first();
+        // $queryString = http_build_query([
+        //     'gateway' => $payment_setting_check->gateway,
+        //     'mode' => $payment_setting_check->mode
+        // ]);
+        return redirect('payment-process'.'/'.$ticketId)->with('success', 'Ticket information saved successfully.\nPlease proceed to payment.');
     }
 
     // public function show(Ticket $ticket) {
@@ -210,6 +209,11 @@ class TicketController extends Controller
         if(!$ticket){
             return back()->with('error','Ticket is not available..');
         }
+        if($ticket->payment_id){
+            $ticket->seat_numbers = $this->seat_numbers_functcion($ticket->id);
+            $ticket->save();
+            $ticket = Ticket::find($ticket->id);
+        }
         $user = Auth::user();
         $bus = Bus::with(['fromStation', 'toStation', 'stopages'])->find($ticket->bus_id);
         return view('tickets.payment-process', compact('ticket','bus','payments'));
@@ -239,6 +243,7 @@ class TicketController extends Controller
             $ticket->payment_id = $payment->id;
             $ticket->save();
         }
+
         return redirect('payment-success/'.$ticket->id)->with('success','Payment done successfully');
     }
     public function generateQRCode($ticketId)
@@ -256,6 +261,10 @@ class TicketController extends Controller
             $passenger_count .= $ticket->sleeper_passenger_count.' Sleeper +';
             $passenger_count .= $ticket->non_sleeper_passenger_count.' Non Sleeper)'; 
         }
+        $seatNumbers = json_decode($ticket->seat_numbers ?? '[]', true);
+        $seatNumbers = is_array($seatNumbers) && count($seatNumbers)
+            ? implode(', ', $seatNumbers)
+            : 'Not assigned';
         
         // Prepare the ticket details
         $data = [
@@ -264,6 +273,7 @@ class TicketController extends Controller
             'Travel Date' => date('d/m/Y',strtotime($ticket->travel_date)).' '.date('h:i A',strtotime($bus->from_time)),
             'Passenger Name' => $ticket->passenger_name,
             'Number of Passengers' => $passenger_count,
+            'Seat Numbers' => $seatNumbers,
             'From' => $ticket->fromStation->name,
             'To' => $ticket->toStation->name,
             'Fare' => 'Rs.' . $ticket->fare,

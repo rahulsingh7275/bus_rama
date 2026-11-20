@@ -141,5 +141,4 @@ Route::middleware('auth')->group(function () {
 
 
 // =============Database Migrations=========
-// php artisan migrate --path=database/migrations/2026_11_12_211948_add_mobile_to_users_table.php
-// php artisan migrate --path=database/migrations/2026_11_12_212008_create_login_otps_table.php
+// php artisan migrate --path=database/migrations/2026_11_18_171500_add_seat_numbers_to_tickets_table.php
