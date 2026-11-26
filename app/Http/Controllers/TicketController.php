@@ -50,8 +50,12 @@ class TicketController extends Controller
 
         // Start building the query
         $query = Ticket::whereIn('bus_id',$allowed_buses)
-        ->with(['fromStation', 'toStation', 'bus', 'payment'])
+        ->with(['fromStation', 'toStation', 'pickup', 'drop', 'bus', 'payment'])
             ->orderBy('travel_date', 'DESC');
+        $isAdmin = $user->role === 'admin';
+        if ($isAdmin) {
+            $query->with('user');
+        }
 
         // Apply filters based on request type
         if ($request->type === 'completed_tickets') {
@@ -105,7 +109,7 @@ class TicketController extends Controller
         $buses = Bus::whereIn('id', $allowed_buses)->orderBy('name')->get();
 
         // Return the view with tickets
-        return view('tickets.index', compact('tickets', 'buses'));
+        return view('tickets.index', compact('tickets', 'buses', 'isAdmin'));
     }
 
     // public function create() {

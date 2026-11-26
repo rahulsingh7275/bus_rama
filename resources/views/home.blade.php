@@ -46,15 +46,12 @@
                     <th>SN</th>
                     <th>Ticket No.</th>
                     <th>Bus</th>
-                    <th>From Stopage</th>
-                    <th>To Stopage</th>
-                    <th>Passenger Name</th>
-                    <th>Passenger Count</th>
+                    <th>From Stopage / Pickup Location</th>
+                    <th>To Stopage / Drop Location</th>
+                    <th>Seat Numbers</th>
                     <th>Travel Date</th>
                     <th>Fare</th>
                     <th>Payment Status</th>
-                    <th>Refund Status</th>
-                    <th>Refund Amount</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -64,15 +61,25 @@
                     <td>{{ ++$index }}</td>
                     <td>{{ $ticket->ticket_no }}</td>
                     <td>{{ $ticket->bus->name }}</td>
-                    <td>{{ $ticket->fromStation->name }}</td>
-                    <td>{{ $ticket->toStation->name }}</td>
-                    <td>{{ $ticket->passenger_name }}</td>
-                    <td>{{ $ticket->passenger_count }}</td>
+                    <td>
+                        {{ $ticket->fromStation->name }}<br>
+                        <small class="text-muted">
+                            Pickup: {{ $ticket->pickup ? $ticket->pickup->name . ' - ' . $ticket->pickup->address : 'Not specified' }}
+                        </small>
+                    </td>
+                    <td>
+                        {{ $ticket->toStation->name }}<br>
+                        <small class="text-muted">
+                            Drop: {{ $ticket->drop ? $ticket->drop->name . ' - ' . $ticket->drop->address : 'Not specified' }}
+                        </small>
+                    </td>
+                    @php
+                        $seatNumbers = json_decode($ticket->seat_numbers ?? '[]', true);
+                    @endphp
+                    <td>{{ is_array($seatNumbers) && count($seatNumbers) ? implode(', ', $seatNumbers) : 'Not assigned' }}</td>
                     <td>{{ $ticket->travel_date }} {{date('h:iA',strtotime($ticket->bus->from_time))}}</td>
                     <td>{{ $ticket->fare }}</td>
                     <td>{{($ticket->payment)?"PAID " :"NOT PAID"}} @if($ticket->deleted_at) <strong class="text-danger">(Cancelled)</strong> @endif</td>
-                    <td>{{($ticket->payment)?$ticket->payment->refund_status:'-'}}</td>
-                    <td>{{($ticket->payment)?$ticket->payment->refund_amount:'-'}}</td>
                     <td>
                     <a href="{{ route('payment-process', $ticket->id) }}" class="btn btn-info">View</a>
                    {{--
