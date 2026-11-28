@@ -44,7 +44,7 @@
         </div>
         <div class="form-group">
             <label for="password">Conductor Password</label>
-            <input type="text" name="password" value="@if(old('password')) {{old('password')}} @endif" class="form-control" required>
+            <input type="password" name="password" class="form-control" autocomplete="new-password" required>
         </div>
         <button type="submit" class="btn btn-primary">Add Conductor</button>
     </form>

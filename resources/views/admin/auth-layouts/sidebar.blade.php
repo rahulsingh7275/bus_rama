@@ -76,23 +76,25 @@
               </span>
             </a>
           </li>
-          <li class="{{ Request::is('passengers*') ? 'active' : '' }}">
-            <a href="{{ route('admin.passengers.index') }}" class="navItem">
-              <span class="flex items-center">
-                <iconify-icon class="nav-icon" icon="heroicons-outline:users"></iconify-icon>
-                <span>Passengers</span>
-              </span>
-            </a>
-          </li>
- 
-          <!-- <li class="{{ Request::is('conductors') ? 'active' : '' }}">
+          <li class="{{ Request::is('conductors*') ? 'active' : '' }}">
             <a href="{{url('conductors')}}" class="navItem">
               <span class="flex items-center">
             <iconify-icon class=" nav-icon" icon="heroicons-outline:user-group"></iconify-icon>
             <span>Conductors</span>
               </span>
             </a>
-          </li> -->
+          </li>
+          @endif
+
+          @if(Auth::user()->role=='admin' || Auth::user()->role=='conductor')
+            <li class="{{ Request::is('passengers*') ? 'active' : '' }}">
+              <a href="{{ route('admin.passengers.index') }}" class="navItem">
+                <span class="flex items-center">
+                  <iconify-icon class="nav-icon" icon="heroicons-outline:users"></iconify-icon>
+                  <span>Passengers</span>
+                </span>
+              </a>
+            </li>
           @endif
 
           <li class="{{ Request::is('tickets') ? 'active' : '' }}">
@@ -104,23 +106,27 @@
             </a>
           </li>
 
-          <li class="{{ Request::is('payment-settings') ? 'active' : '' }}">
-            <a href="{{url('payment-settings')}}" class="navItem">
-              <span class="flex items-center">
-            <iconify-icon class=" nav-icon" icon="heroicons-outline:arrow-path"></iconify-icon>
-            <span>Payment Settings</span>
-              </span>
-            </a>
-          </li>
+          @if(Auth::user()->role=='admin')
+            <li class="{{ Request::is('payment-settings') ? 'active' : '' }}">
+              <a href="{{url('payment-settings')}}" class="navItem">
+                <span class="flex items-center">
+                  <iconify-icon class=" nav-icon" icon="heroicons-outline:arrow-path"></iconify-icon>
+                  <span>Payment Settings</span>
+                </span>
+              </a>
+            </li>
+          @endif
 
-          <li class="{{ Request::is('change-password') ? 'active' : '' }}">
-            <a href="{{ route('password.change') }}" class="navItem">
-              <span class="flex items-center">
-                <iconify-icon class="nav-icon" icon="heroicons-outline:lock-closed"></iconify-icon>
-                <span>Change Password</span>
-              </span>
-            </a>
-          </li>
+          @if(Auth::user()->role=='user')
+            <li class="{{ Request::is('change-password') ? 'active' : '' }}">
+              <a href="{{ route('password.change') }}" class="navItem">
+                <span class="flex items-center">
+                  <iconify-icon class="nav-icon" icon="heroicons-outline:lock-closed"></iconify-icon>
+                  <span>Change Password</span>
+                </span>
+              </a>
+            </li>
+          @endif
 
           <!-- <li class="{{ Request::is('conductor/tickets') ? 'active' : '' }}">
             <a href="{{url('conductor/tickets')}}" class="navItem">

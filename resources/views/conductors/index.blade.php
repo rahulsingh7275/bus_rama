@@ -35,9 +35,9 @@
         <tbody>
             @foreach($conductors as $conductor)
             <tr>
+                <td>{{ $conductor->bus->name }}</td>
                 <td>{{ $conductor->user->name }}</td>
                 <td>{{ $conductor->user->email }}</td>
-                <td>{{ $conductor->bus->name }}</td>
                 <td>
                     <a href="{{ route('conductors.edit', $conductor->id) }}" class="btn btn-warning">Edit</a>
                     <!-- <form action="{{ route('conductors.destroy', $conductor->id) }}" method="POST" class="d-inline">

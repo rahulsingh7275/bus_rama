@@ -6,6 +6,7 @@ use App\Models\Conductor;
 use App\Models\Bus;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class ConductorController extends Controller
 {
@@ -30,11 +31,9 @@ class ConductorController extends Controller
         $user->role = 'conductor';
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->password = $request->password;
+        $user->password = Hash::make($request->password);
         $user->save();
-        if($user->save()){
-            Conductor::create(['bus_id'=>$request->bus_id,'user_id'=>$user->id]);
-        }
+        Conductor::create(['bus_id'=>$request->bus_id,'user_id'=>$user->id]);
 
         return redirect()->route('conductors.index')->with('success', 'Conductor created successfully.');
     }
